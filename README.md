@@ -57,7 +57,7 @@ Smart-Goal-Planner/
 
 ### 1. Clone the repository
 
-git clone https://github.com/your-username/smart-goal-planner.git
+git clone (https://github.com/EvaArbo/phase-two-code-challange)
 cd smart-goal-planner
 2. Install dependencies
 
