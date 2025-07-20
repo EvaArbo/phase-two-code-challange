@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 
 function Deposit({ goals, onDeposit }) {
-  const [selectedGoal, setSelectedGoal] = useState("");
+  const [goalId, setGoalId] = useState("");
   const [amount, setAmount] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!selectedGoal || !amount) {
-      alert("Please select a goal and enter an amount.");
+    if (!goalId || !amount) {
+      alert("Please select a goal and enter an amount");
       return;
     }
 
-    onDeposit(selectedGoal, parseInt(amount));
+    onDeposit(goalId, amount);
+    alert("Deposit successful!");
+
+    setGoalId("");
     setAmount("");
-    setSelectedGoal("");
   };
 
   return (
@@ -22,8 +23,8 @@ function Deposit({ goals, onDeposit }) {
       <h2>Make a Deposit</h2>
       <form onSubmit={handleSubmit}>
         <select
-          value={selectedGoal}
-          onChange={(e) => setSelectedGoal(e.target.value)}
+          value={goalId}
+          onChange={(e) => setGoalId(e.target.value)}
         >
           <option value="">Select Goal</option>
           {goals.map((goal) => (
@@ -32,14 +33,13 @@ function Deposit({ goals, onDeposit }) {
             </option>
           ))}
         </select>
-
         <input
           type="number"
-          value={amount}
           placeholder="Amount"
+          value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          min="1"
         />
-
         <button type="submit">Deposit</button>
       </form>
     </div>

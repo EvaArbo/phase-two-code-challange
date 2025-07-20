@@ -8,12 +8,19 @@ import "./App.css";
 function App() {
   const [goals, setGoals] = useState([]);
 
-  useEffect(() => {
+  // Fetch all goals from json-server
+  const fetchGoals = () => {
     fetch("http://localhost:3000/goals")
       .then((res) => res.json())
-      .then(setGoals);
+      .then((data) => setGoals(data))
+      .catch((err) => console.error("Fetch error:", err));
+  };
+
+  useEffect(() => {
+    fetchGoals();
   }, []);
 
+  // Add new goal
   const addGoal = (goal) => {
     fetch("http://localhost:3000/goals", {
       method: "POST",
@@ -21,15 +28,10 @@ function App() {
       body: JSON.stringify({ ...goal, savedAmount: 0 }),
     })
       .then((res) => res.json())
-      .then((newGoal) => setGoals((prev) => [...prev, newGoal]));
+      .then(() => fetchGoals());
   };
 
-  const deleteGoal = (id) => {
-    fetch(`http://localhost:3000/goals/${id}`, {
-      method: "DELETE",
-    }).then(() => setGoals((prev) => prev.filter((g) => g.id !== id)));
-  };
-
+  // Update goal (edit or deposit)
   const updateGoal = (updatedGoal) => {
     fetch(`http://localhost:3000/goals/${updatedGoal.id}`, {
       method: "PATCH",
@@ -37,17 +39,35 @@ function App() {
       body: JSON.stringify(updatedGoal),
     })
       .then((res) => res.json())
-      .then((data) =>
-        setGoals((prev) =>
-          prev.map((goal) => (goal.id === data.id ? data : goal))
-        )
-      );
+      .then(() => fetchGoals());
   };
 
-  const makeDeposit = (id, amount) => {
-    const goal = goals.find((g) => g.id === parseInt(id));
-    const newAmount = goal.savedAmount + parseInt(amount);
-    updateGoal({ ...goal, savedAmount: newAmount });
+  // Delete goal
+  const deleteGoal = (id) => {
+    fetch(`http://localhost:3000/goals/${id}`, {
+      method: "DELETE",
+    }).then(() => fetchGoals());
+  };
+
+  // Handle deposit
+  const makeDeposit = (goalId, amount) => {
+    const numericGoalId = Number(goalId); // ✅ Convert goalId to number
+    const goal = goals.find((g) => g.id === numericGoalId);
+    if (!goal) {
+      console.error("Goal not found for deposit:", goalId);
+      return;
+    }
+
+    const newSavedAmount = goal.savedAmount + parseInt(amount);
+
+    fetch(`http://localhost:3000/goals/${numericGoalId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ savedAmount: newSavedAmount }),
+    })
+      .then((res) => res.json())
+      .then(() => fetchGoals())
+      .catch((err) => console.error("Deposit error:", err));
   };
 
   return (
